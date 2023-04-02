@@ -101,13 +101,13 @@ class WorkerController implements ControllerBase
     {
         $errors = [];
 
-        if ($is_new && empty($data["name"])) {
-            $errors[] = "name is required";
-        }
+        if ($is_new) {
+            if (empty($data["name"])) {
+                $errors[] = "name is required";
+            }
 
-        if (array_key_exists("size", $data)) {
-            if (filter_var($data["size"], FILTER_VALIDATE_INT) === false) {
-                $errors[] = "size must be an integer";
+            if (empty($data["document"])) {
+                $errors[] = "document is required";
             }
         }
 
