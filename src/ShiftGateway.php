@@ -73,6 +73,24 @@ class ShiftGateway extends GatewayBase
         return $data;
     }
 
+    public function getWorkerShifts(string $worker_id): array|false
+    {
+        $sql =
+            "SELECT * 
+            FROM {$this->table}
+            WHERE worker_id = :worker_id";
+
+        $statement = $this->conn->prepare($sql);
+        $statement->bindValue(":worker_id", $worker_id, PDO::PARAM_INT);
+        $statement->execute();
+
+        while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
+            $data[] = $row;
+        }
+
+        return $data;
+    }
+
     public function update(array $current, array $new): int
     {
         $sql =

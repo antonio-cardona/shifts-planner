@@ -4,11 +4,15 @@ class WorkerGateway extends GatewayBase
 {
     private PDO $conn;
 
+    private ShiftGateway $shift_gateway;
+
     private string $table = "worker";
 
     public function __construct(Database $database)
     {
         $this->conn = $database->getConnection();
+
+        $this->shift_gateway = new ShiftGateway($database);
     }
 
     public function getAll(): array
@@ -58,6 +62,9 @@ class WorkerGateway extends GatewayBase
         if ($data !== false) {
             $data["is_available"] = (bool) $data["is_available"];
         }
+
+        $shifts = $this->shift_gateway->getWorkerShifts($id);
+        $data["shifts"] = $shifts;
 
         return $data;
     }
