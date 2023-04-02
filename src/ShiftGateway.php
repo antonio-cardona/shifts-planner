@@ -27,18 +27,34 @@ class ShiftGateway extends GatewayBase
 
     public function create(array $data): string
     {
+        // Validate first if the worker it's free in the selected date.
         $sql =
-            "INSERT INTO {$this->table} (worker_id, shift_type, shift_date)
-            VALUES (:worker_id, :shift_type, :shift_date)";
+            "SELECT * 
+            FROM {$this->table}
+            WHERE worker_id = :worker_id AND shift_date = :shift_date";
 
         $statement = $this->conn->prepare($sql);
         $statement->bindValue(":worker_id", $data["worker_id"], PDO::PARAM_INT);
-        $statement->bindValue(":shift_type", $data["shift_type"] ?? 0, PDO::PARAM_INT);
-        $statement->bindValue(":shift_date", $data["shift_date"] ?? "1977-04-20", PDO::PARAM_STR);
-
+        $statement->bindValue(":shift_date", $data["shift_date"], PDO::PARAM_STR);
         $statement->execute();
+        $result = $statement->fetch(PDO::FETCH_ASSOC);
 
-        return $this->conn->lastInsertId();
+        if (empty($result)) {
+            $sql =
+                "INSERT INTO {$this->table} (worker_id, shift_type, shift_date)
+            VALUES (:worker_id, :shift_type, :shift_date)";
+
+            $statement = $this->conn->prepare($sql);
+            $statement->bindValue(":worker_id", $data["worker_id"], PDO::PARAM_INT);
+            $statement->bindValue(":shift_type", $data["shift_type"] ?? 0, PDO::PARAM_INT);
+            $statement->bindValue(":shift_date", $data["shift_date"] ?? "1977-04-20", PDO::PARAM_STR);
+
+            $statement->execute();
+
+            return $this->conn->lastInsertId();
+        }
+
+        return false;
     }
 
     public function get(string $id): array|false
@@ -69,7 +85,7 @@ class ShiftGateway extends GatewayBase
         $statement->bindValue(":shift_type", $new["shift_type"] ?? $current["shift_type"], PDO::PARAM_INT);
         $statement->bindValue(":shift_date", $new["shift_date"] ?? $current["shift_date"], PDO::PARAM_STR);
         $statement->bindValue(":id", $current["id"], PDO::PARAM_INT);
-        
+
         $statement->execute();
 
         return $statement->rowCount();

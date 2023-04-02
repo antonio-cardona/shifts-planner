@@ -83,11 +83,18 @@ class ShiftController implements ControllerBase
 
                 $id = $this->gateway->create($data);
 
-                http_response_code(201);
-                echo json_encode([
-                    "message" => "Shift created",
-                    "id" => $id
-                ]);
+                if ($id){
+                    http_response_code(201);
+                    echo json_encode([
+                        "message" => "Shift created",
+                        "id" => $id
+                    ]);
+                } else {
+                    http_response_code(422);
+                    echo json_encode(["errors" => ["The Worker {$data['worker_id']} already has a Shift assigned to the requested date ({$data['shift_date']})."]]);
+                }
+
+                
                 break;
 
             default:
