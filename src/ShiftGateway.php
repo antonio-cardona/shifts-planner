@@ -75,6 +75,7 @@ class ShiftGateway extends GatewayBase
 
     public function getWorkerShifts(string $worker_id): array|false
     {
+        $data = array();
         $sql =
             "SELECT * 
             FROM {$this->table}
